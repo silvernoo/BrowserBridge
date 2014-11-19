@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Window;
 
 public class Bridge extends Activity {
 	@Override
@@ -26,5 +27,6 @@ public class Bridge extends Activity {
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(url));
 		startActivity(intent);
+		finish();
 	}
 }

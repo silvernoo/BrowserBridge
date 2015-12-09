@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BrowserBridge</string>
+
+    <string name="not_found_that_url">Not found that url</string>
+    <string name="share_content_is_null">Share content is null</string>
+    <string name="write_to_clipboard">Write to clipboard</string>
+</resources>

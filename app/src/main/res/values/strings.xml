@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">BrowserBridge</string>
 
-    <string name="not_found_that_url">Not found that url</string>
+    <string name="url_not_found">Url not found</string>
     <string name="share_content_is_null">Share content is null</string>
     <string name="write_to_clipboard">Write to clipboard</string>
+    <string name="enable_clipboard">开启剪切板</string>
+    <string name="disable_clipboard">关闭剪切板</string>
+    <string name="open">打开</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="open_url_in_browser">在浏览器中打开链接</string>
 </resources>

@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "silvernoo.github.com.browserbridge"
-        minSdkVersion 8
+        applicationId "com.github.silvernoo.browserbridge"
+        minSdkVersion 11
         targetSdkVersion 22
         versionCode 2
         versionName "1.2"
@@ -17,4 +17,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.+'
+    compile 'com.android.support:design:22.+'
+    compile 'com.android.support:recyclerview-v7:22.+'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
 }

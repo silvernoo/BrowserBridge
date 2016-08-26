@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.github.silvernoo.browserbridge.MainActivity">
+    <item
+        android:id="@+id/action_enable_clipboard"
+        android:orderInCategory="100"
+        android:title="@string/enable_clipboard"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_disable_clipboard"
+        android:orderInCategory="100"
+        android:title="@string/disable_clipboard"
+        app:showAsAction="never"/>
+</menu>

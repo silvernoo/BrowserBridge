@@ -1,18 +1,22 @@
 package com.github.silvernoo.browserbridge;
 
-import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.github.silvernoo.browserbridge.dao.ShareContentDao;
+import com.github.silvernoo.browserbridge.ext.ItemTouchHelperViewHolder;
 import com.github.silvernoo.browserbridge.ext.MyListCursorAdapter;
 import com.github.silvernoo.browserbridge.widget.SimpleDividerItemDecoration;
 
@@ -24,6 +28,8 @@ public class MainActivity extends BaseActivity {
 
     private ShareContentDao shareContentDao;
     private MyListCursorAdapter mAdapter;
+    public static final float ALPHA_FULL = 1.0f;
+    public Cursor cursor;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,17 +51,70 @@ public class MainActivity extends BaseActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new MyListCursorAdapter(this, shareContentDao.preLoad());
+        mAdapter = new MyListCursorAdapter(this, cursor = shareContentDao.preLoad());
         mRecyclerView.setAdapter(mAdapter);
 
-        Intent intent = new Intent();
-        intent.setClassName("com.android.settings", "com.android.settings.Settings$UsageAccessSettingsActivity");
-        intent.setAction("android.intent.action.MAIN");
-        intent.addCategory("android.intent.category.DEFAULT");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        startActivity(intent);
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                MyListCursorAdapter.ViewHolder viewHolder1 = (MyListCursorAdapter.ViewHolder) viewHolder;
+                shareContentDao.flow();
+                shareContentDao.excludeId = viewHolder1._id;
+                Snackbar.make(((MyListCursorAdapter.ViewHolder) viewHolder).mTextView1, R.string.deleted_record, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.undo, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                shareContentDao.excludeId = -1;
+                                mAdapter.changeCursor(cursor = shareContentDao.preLoad(), 0);
+                            }
+                        }).show();
+                mAdapter.changeCursor(cursor = shareContentDao.preLoad(), 0);
+            }
+
+            @Override
+            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+                // We only want the active item to change
+                if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
+                    if (viewHolder instanceof ItemTouchHelperViewHolder) {
+                        // Let the view holder know that this item is being moved or dragged
+                        ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
+                        itemViewHolder.onItemSelected();
+                    }
+                }
+                super.onSelectedChanged(viewHolder, actionState);
+            }
+
+            @Override
+            public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+
+                viewHolder.itemView.setAlpha(ALPHA_FULL);
+
+                if (viewHolder instanceof ItemTouchHelperViewHolder) {
+                    // Tell the view holder it's time to restore the idle state
+                    ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
+                    itemViewHolder.onItemClear();
+                }
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
+
+
+//        Intent intent = new Intent();
+//        intent.setClassName("com.android.settings", "com.android.settings.Settings$UsageAccessSettingsActivity");
+//        intent.setAction("android.intent.action.MAIN");
+//        intent.addCategory("android.intent.category.DEFAULT");
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+//                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+//        startActivity(intent);
     }
 
     @Override
@@ -80,15 +139,21 @@ public class MainActivity extends BaseActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_enable_clipboard) {
-            mPreferences.edit().putBoolean(KEY_CLIPBOARD, true).commit();
+            mPreferences.edit().putBoolean(KEY_CLIPBOARD, true).apply();
             invalidateOptionsMenu();
             return true;
         } else if (id == R.id.action_disable_clipboard) {
-            mPreferences.edit().putBoolean(KEY_CLIPBOARD, false).commit();
+            mPreferences.edit().putBoolean(KEY_CLIPBOARD, false).apply();
             invalidateOptionsMenu();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        shareContentDao.flow();
     }
 
     @Override

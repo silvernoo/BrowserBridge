@@ -10,4 +10,6 @@
     <string name="save">保存</string>
     <string name="cancel">取消</string>
     <string name="open_url_in_browser">在浏览器中打开链接</string>
+    <string name="undo">撤销</string>
+    <string name="deleted_record">已删除一条记录</string>
 </resources>
